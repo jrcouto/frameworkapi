@@ -1,0 +1,9 @@
+1- API desenvolvida com o uso de Spring boot (https://spring.io/projects/spring-boot) e Flyway (https://flywaydb.org/) para controle do versionamento das tabelas do SGBD. Utiliza, para autenticação, tokens JWT.
+
+2- Para rodar:
+   0- Baixe a aplicação (Git clone);
+   1- Crie, no PostgreSQL, uma database com o nome de frameworkapi (ou com o nome que preferir, mas será necessário ajustar o novo nome no arquivo Application.properties);
+   2- No arquivo application.properties, realize as configurações para acesso ao SGBD (ip, login e senha);
+   3- Inicie a aplicação, e todas as tabelas serão criadas automaticamente na database, com dados para realização de testes;
+   
+   
