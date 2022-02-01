@@ -22,39 +22,39 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE) 
 public class RefreshTokenCookiePreProcessorFilter implements Filter{
 
+
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		// TODO Auto-generated method stub
+		
 		HttpServletRequest req = (HttpServletRequest) request;
 		
-		if ("/oauth/token".equalsIgnoreCase(req.getRequestURI()) && "refresh_token".equals(req.getParameter("grant_type"))
-				&& req.getCookies() !=null) {
-			for(Cookie cookie : req.getCookies()) {
-				if(cookie.getName().equals("refreshToken")) {
+		if ("/oauth/token".equalsIgnoreCase(req.getRequestURI()) 
+				&& "refresh_token".equals(req.getParameter("grant_type"))
+				&& req.getCookies() != null) {
+			for (Cookie cookie : req.getCookies()) {
+				if (cookie.getName().equals("refreshToken")) {
 					String refreshToken = cookie.getValue();
-					req = new MyServletRequestWrapper(req, refreshToken); //Intercepta a requisição e adiciona o refresh token como um parametro
+					req = new MyServletRequestWrapper(req, refreshToken);
 				}
 			}
 		}
-		chain.doFilter(req, response);
-	}
-
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		// TODO Auto-generated method stub
 		
+		chain.doFilter(req, response);
 	}
 	
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void init(FilterConfig arg0) throws ServletException {
 		
 	}
 	
-	
 	static class MyServletRequestWrapper extends HttpServletRequestWrapper {
-		
+
 		private String refreshToken;
 		
 		public MyServletRequestWrapper(HttpServletRequest request, String refreshToken) {
@@ -63,12 +63,11 @@ public class RefreshTokenCookiePreProcessorFilter implements Filter{
 		}
 		
 		@Override
-		public Map<String, String[]> getParameterMap(){
+		public Map<String, String[]> getParameterMap() {
 			ParameterMap<String, String[]> map = new ParameterMap<>(getRequest().getParameterMap());
-			map.put("refresh_token", new String[]{refreshToken});
+			map.put("refresh_token", new String[] { refreshToken });
 			map.setLocked(true);
 			return map;
-			
 		}
 		
 	}

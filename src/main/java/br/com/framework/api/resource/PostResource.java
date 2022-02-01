@@ -13,7 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,17 +45,20 @@ public class PostResource {
 	
 	
 	@GetMapping("/listAll") 
+	@PreAuthorize("hasAuthority('ROLE_SEARCH_POST') and #oauth2.hasScope('read')")
 	public Page<Post> list(Pageable pageable){ 
 		return postRepository.findAll(pageable); 
 	}
 	
 	
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_SEARCH_POST') and #oauth2.hasScope('read')")
 	public List<Post> search(PostFilter postFilter, Pageable pageable){ 
 		return postRepository.filter(postFilter);
 	} 
 	  
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_INSERT_POST') and #oauth2.hasScope('write')")
 	public ResponseEntity<Post> save(@Valid @RequestBody Post post, HttpServletResponse response) {
 		post.setPublishDate(LocalDate.now());
 		Post savedPost = postRepository.save(post);
@@ -67,18 +70,21 @@ public class PostResource {
 	}  
 	
 	@GetMapping("/{id}")  
+	@PreAuthorize("hasAuthority('ROLE_SEARCH_POST') and #oauth2.hasScope('read')")
 	public ResponseEntity<Post> getById(@PathVariable Integer id) {
 		Post foundPost = postRepository.findOne(id);
 		return foundPost ==null ? ResponseEntity.notFound().build() : ResponseEntity.ok().body(foundPost);
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_DELETE_POST') and #oauth2.hasScope('write')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable Integer id) {
 		postRepository.delete(id);
 	}
 	
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_UPDATE_POST') and #oauth2.hasScope('write')")
 	public ResponseEntity<Post> update(@PathVariable Integer id, @Valid @RequestBody Post post){
 		post.setLastUpdateDate(LocalDate.now());
 		Post savedPost = postService.update(id, post);

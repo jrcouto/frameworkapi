@@ -33,7 +33,7 @@ public class AppUserDetailsService implements UserDetailsService{
 	
 	private Collection<? extends GrantedAuthority> getRoles(Person person){
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-		person.getRoles().forEach(p -> authorities.add(new SimpleGrantedAuthority(p.getDescription())));
+		person.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getDescription())));
 		return authorities;
 	}
 }

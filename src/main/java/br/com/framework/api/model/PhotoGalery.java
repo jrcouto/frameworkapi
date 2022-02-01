@@ -1,8 +1,11 @@
 package br.com.framework.api.model;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,10 +16,9 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-
 @Entity
-@Table(name = "post")
-public class Post {
+@Table(name = "photo_galery")
+public class PhotoGalery {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +28,13 @@ public class Post {
 	@Size(min=3, max = 255)
 	private String title;
 	
-	@NotNull
-	@Size(min=3, max = 4000)
-	private String text;
-	
-	private LocalDate publishDate;
-	
-	private LocalDate lastUpdateDate;
+	@ElementCollection
+	@CollectionTable(
+	      name="photo_galery_list",
+	      joinColumns=@JoinColumn(name="photo_galery_id")
+	)
+	@Column(name="photo_path")
+	private List<String> photoList;
 	
 	@ManyToOne
 	@JoinColumn(name = "person_id")
@@ -54,28 +56,12 @@ public class Post {
 		this.title = title;
 	}
 
-	public String getText() {
-		return text;
+	public List<String> getPhotoList() {
+		return photoList;
 	}
 
-	public void setText(String text) {
-		this.text = text;
-	}
-
-	public LocalDate getPublishDate() {
-		return publishDate;
-	}
-
-	public void setPublishDate(LocalDate publishDate) {
-		this.publishDate = publishDate;
-	}
-
-	public LocalDate getLastUpdateDate() {
-		return lastUpdateDate;
-	}
-
-	public void setLastUpdateDate(LocalDate lastUpdateDate) {
-		this.lastUpdateDate = lastUpdateDate;
+	public void setPhotoList(List<String> photoList) {
+		this.photoList = photoList;
 	}
 
 	public Person getPerson() {
@@ -88,7 +74,7 @@ public class Post {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, lastUpdateDate, person, publishDate, text, title);
+		return Objects.hash(id);
 	}
 
 	@Override
@@ -99,14 +85,9 @@ public class Post {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Post other = (Post) obj;
-		return Objects.equals(id, other.id) && Objects.equals(lastUpdateDate, other.lastUpdateDate)
-				&& Objects.equals(person, other.person) && Objects.equals(publishDate, other.publishDate)
-				&& Objects.equals(text, other.text) && Objects.equals(title, other.title);
+		PhotoGalery other = (PhotoGalery) obj;
+		return Objects.equals(id, other.id);
 	}
-
-
-
 	
 	
 }
