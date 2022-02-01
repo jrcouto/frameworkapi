@@ -1,7 +1,9 @@
 package br.com.framework.api.resource;
 
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -20,16 +22,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.framework.api.event.ResourceCreatedEvent;
 import br.com.framework.api.model.PhotoGalery;
+import br.com.framework.api.payload.UploadFileResponse;
 import br.com.framework.api.repository.PhotoGaleryRepository;
+import br.com.framework.api.service.FileStorageService;
 import br.com.framework.api.service.PhotoGaleryService;
 
 @RestController
-@RequestMapping("/photo_galeries")
+@RequestMapping("/photoGaleries")
 public class PhotoGaleryResource {
 
 	@Autowired
@@ -41,6 +48,36 @@ public class PhotoGaleryResource {
 	@Autowired
 	private PhotoGaleryService photoGaleryService;
 	
+    @Autowired
+    private FileStorageService fileStorageService;
+    
+    //Realiza o upload de um arquivo para uma galeria
+    @PostMapping("/uploadFile/{galeryId}")
+    public UploadFileResponse uploadFile(@RequestParam("file") MultipartFile file, @PathVariable Integer galeryId) {
+        String fileName = fileStorageService.storeFile(file);
+
+        
+        
+        String fileUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/files/")
+                .path(galeryId.toString())
+                .path(fileName)
+                .toUriString();
+        
+        photoGaleryService.updatePhotoList(galeryId, fileUri);
+        
+        
+        return new UploadFileResponse(fileName, fileUri, file.getContentType(), file.getSize());
+    }
+
+    //Realiza o upload de vários arquivos para uma galeria
+    @PostMapping("/uploadMultipleFiles/{galeryId}")
+    public List<UploadFileResponse> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files, Integer galeryId) {
+        return Arrays.asList(files)
+                .stream()
+                .map(file -> uploadFile(file, galeryId))
+                .collect(Collectors.toList());
+    }
 	
 	@GetMapping("/person/{personId}") 
 	@PreAuthorize("hasAuthority('ROLE_SEARCH_PHOTO_GALERY') and #oauth2.hasScope('read')")
@@ -86,4 +123,5 @@ public class PhotoGaleryResource {
 		PhotoGalery savedPhotoGalery = photoGaleryService.update(id, photoGalery);
 		return ResponseEntity.ok(savedPhotoGalery); 
 	}
+
 }
